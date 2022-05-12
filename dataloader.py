@@ -4,10 +4,20 @@ from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
 
 
-def get_images_and_labels(dir_path)
-    print("")
-    # 读取label
+def get_images_and_labels(root_path, label_files):
+ 
+    root_path = root_path+"/"
+    filenames = []
+    labels = []
+    with open(root_path+label_files) as f:
+        dir_labels = [line.strip().split(' ') for line in f.readlines()] 
 
+    for filename, label in dir_labels:
+        filenames.append(root_path+filename)
+        labels.append(label)
+        # print(root_path+filename, label)
+ 
+    return filenames, labels
 
 def pil_loader(path):
     with open(path, 'rb') as f:
@@ -15,30 +25,34 @@ def pil_loader(path):
             return img.convert('RGB')
 
 class HandWashDataset(Dataset):
-    def __init__(self, dir_path, transform=None, loader=pil_loader):
+    def __init__(self, dir_path, label_file, transform=None, loader=pil_loader):
         self.dir_path = dir_path
+        self.label_file = label_file
         self.transform = transform
-        self.images, self.labels = get_images_and_labels(self.dir_path)
+        self.loader = loader
+        self.images, self.labels = get_images_and_labels(self.dir_path, self.label_file )
  
     def __len__(self):
-        # 返回数据集的数据数量
         return len(self.images)
  
     def __getitem__(self, index):
         img_path = self.images[index]
         label = self.labels[index]
 
-        imgs = self.loader(img_names)
+        imgs = self.loader(img_path)
         if self.transform is not None:
             imgs = self.transform(imgs)
-        return imgs, label
+        return imgs, torch.tensor(int(label))
 
-def HandWashDataloader(train_paths, val_paths, batch_size)
+def HandWashDataloader(root_paths, batch_size):
+
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                    std=[0.229, 0.224, 0.225])
     train_transforms = transforms.Compose([
         transforms.RandomResizedCrop(224),
-        RandomHorizontalFlip(),
+        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize([0.3456, 0.2281, 0.2233], [0.2528, 0.2135, 0.2104])
+        normalize
     ])
 
     # 确定imagenet test transforms
@@ -49,8 +63,8 @@ def HandWashDataloader(train_paths, val_paths, batch_size)
         normalize
     ])
     
-    train_dataset = HandWashDataset(train_paths, train_transforms)
-    val_dataset =   HandWashDataset(val_paths, test_transforms)
+    train_dataset = HandWashDataset(root_paths, "train_list.txt", train_transforms)
+    val_dataset =   HandWashDataset(root_paths, "val_list.txt", test_transforms)
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset,

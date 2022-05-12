@@ -1,9 +1,10 @@
-impor torch
+import torch
+from torchvision import models
 
 
 class HandWashModel(torch.nn.Module):
     def __init__(self):
-        super(HWModel, self).__init__()
+        super(HandWashModel, self).__init__()
         resnet = models.resnet50(pretrained=True)
         self.share = torch.nn.Sequential()
         self.share.add_module("conv1", resnet.conv1)
@@ -15,8 +16,8 @@ class HandWashModel(torch.nn.Module):
         self.share.add_module("layer3", resnet.layer3)
         self.share.add_module("layer4", resnet.layer4)
         self.share.add_module("avgpool", resnet.avgpool)
-        self.fc = nn.Linear(2048, 7)
-        init.xavier_uniform(self.fc.weight)
+        self.fc = torch.nn.Linear(2048, 7)
+        torch.nn.init.xavier_uniform_(self.fc.weight)
 
     def forward(self, x):
         x = self.share.forward(x)
