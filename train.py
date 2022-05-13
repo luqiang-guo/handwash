@@ -43,6 +43,7 @@ def train(datasete_paths, batch_size, epochs, use_gpu):
         # train
         for input, target in train_loader:
             #
+            print(input.size())
             if use_gpu:
                 input = input.to(device)
                 target = target.to(device)
