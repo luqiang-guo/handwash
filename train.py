@@ -3,7 +3,7 @@ import torch
 from dataloader import HandWashDataloader
 from model import HandWashModel
 from utils import accuracy
-
+import copy
 
 
 def train(datasete_paths, batch_size, epochs, use_gpu):
@@ -40,22 +40,39 @@ def train(datasete_paths, batch_size, epochs, use_gpu):
     model.train()
 
     for epoch in range(epochs):
-        #
-        
-        for imgs, target in train_loader:
-            # print(imgs, target)
+        # train
+        for input, target in train_loader:
+            #
             if use_gpu:
-                imgs = imgs.to(device)
+                input = input.to(device)
                 target = target.to(device)
-            output = model.forward(imgs)
+            output = model.forward(input)
 
             loss = criterion(output, target)
             
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            print(loss)
-
             prec1 = accuracy(output.data, target)
-            print("top1 : ", prec1)
+            # print("Epoch:{} train :top1 ")
+            print("train :top1 ", prec1, "loss : ", loss)
+
+        # validation
+        for i, (input, target) in enumerate(val_loader):
+            if use_gpu:
+                input = input.to(device)
+                target = target.to(device)
+            
+            with torch.no_grad():
+                output = model.forward(input)
+                prec1 = accuracy(output.data, target)
+                print("validation : top1 ", prec1)
+        
+        # save models
+
+        model_wts = copy.deepcopy(model.state_dict())
+
+        model_name = "./models/" + "handwash_" + str(epoch) + ".pth"
+        torch.save(model_wts, model_name)
+
 

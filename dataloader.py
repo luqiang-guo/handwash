@@ -75,6 +75,6 @@ def HandWashDataloader(root_paths, batch_size):
     val_loader = torch.utils.data.DataLoader(
         val_dataset,
         batch_size=batch_size,
-        shuffle=False,
+        shuffle=True,
     )
     return train_loader, val_loader
