@@ -2,7 +2,7 @@ import torch
 
 from dataloader import HandWashDataloader
 from model import HandWashModel
-
+from utils import accuracy
 
 
 
@@ -21,7 +21,7 @@ def train(datasete_paths, batch_size, epochs, use_gpu):
         model = model.to(device)
 
     # optimizer
-    learning_rate = 1e-3
+    learning_rate = 0.0005
     momentum = 0.9
     dampening = 0.0
     weight_decay = 0.0
@@ -42,17 +42,20 @@ def train(datasete_paths, batch_size, epochs, use_gpu):
     for epoch in range(epochs):
         #
         
-        for imgs, label in train_loader:
-            # print(imgs, label)
+        for imgs, target in train_loader:
+            # print(imgs, target)
             if use_gpu:
                 imgs = imgs.to(device)
-                label = label.to(device)
-            out = model.forward(imgs)
+                target = target.to(device)
+            output = model.forward(imgs)
 
-            loss = criterion(out, label)
+            loss = criterion(output, target)
             
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             print(loss)
+
+            prec1 = accuracy(output.data, target)
+            print("top1 : ", prec1)
 
