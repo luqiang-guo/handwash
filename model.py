@@ -16,7 +16,7 @@ class HandWashModel(torch.nn.Module):
         self.share.add_module("layer3", resnet.layer3)
         self.share.add_module("layer4", resnet.layer4)
         self.share.add_module("avgpool", resnet.avgpool)
-        self.fc = torch.nn.Linear(2048, 7)
+        self.fc = torch.nn.Linear(2048, 4)
         torch.nn.init.xavier_uniform_(self.fc.weight)
 
     def forward(self, x):
